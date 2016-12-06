@@ -1,0 +1,39 @@
+关于 onresize 事件触发次数，不同浏览器不同，safari, opera, firefox 都是一次(分别只用了一个版本测试，都是较新的);
+//ie6 在 quirk 下触发 2 次，标准下 3 次；ie7，8 在 quirk 和 standard 都是两次。
+window.onresize = function(){
+console.log( 'hello world');
+}
+onresize 触发多少次并不重要，重要的是解决办法：在触发多次的情况下之调用一次帮定到 onresize 上的函数
+//
+ 
+ 
+var debounce = function (func, threshold, execAsap) {
+var timeout;
+return function debounced () {
+var obj = this, args = arguments;
+function delayed () {
+if (!execAsap)
+func.apply(obj, args);
+timeout = null;
+};
+if (timeout)
+clearTimeout(timeout);
+else if (execAsap)
+func.apply(obj, args);
+timeout = setTimeout(delayed, threshold || 100);
+};
+} 
+
+debounce 接受 3 个参数，后两个可选；第一个是要 debounce 的函数， 第二个代表 debouce 的时间间隔，第三个在时间段的开始还是结束执行函数;
+debounce 返回包装好的函数，该函数两次执行间隔至少是 threshold，并且小于 threshold 间隔的调用会重新开始计时( 两次调用的时间间隔);
+把 clearTimeout( timeout ) 换为 timer = null; 返回函数两次执行间隔至少是 threshold，并且小于 threshold 间隔的调用会重新开始计时( 两次调用的时间间隔); 
+
+
+// 解决 onresize 多次调用 
+
+
+window.onresize = debounce( function(){
+alert( 'hello world');
+}, 100, true) 
+
+// 在自动补齐中为了减少请求服务器次数也会用到 debounce, 只有连续敲键间隔大于某个值才会发送 ajax 
